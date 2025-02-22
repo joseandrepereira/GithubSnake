@@ -195,7 +195,6 @@ Adicione a imagem da cobrinha com este código:
 ```
 - Substitua **SEU-USUARIO** pelo seu nome de usuário no GitHub.
 - Substitua **ESTILO-COBRINHA** pelo estilo que você deseja adicionar.
-   - [Ir para Estilos de Cobrinhas](https://github.com/joseandrepereira/GithubSnake/edit/main/README.md#-estilos-de-cobrinhas)
    - [Ir para Estilos de Cobrinhas](#-estilos-de-cobrinhas)
 - Salve o arquivo e veja a animação no seu perfil! 🎉
 ##
