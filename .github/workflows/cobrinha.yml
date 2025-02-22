@@ -1,0 +1,73 @@
+name: Generator Snake  # Nome do workflow
+
+on:
+  # Agendamento automático a cada 12 horas
+  schedule:
+    - cron: "0 */12 * * *" 
+
+  # Permite a execução manual do workflow a qualquer momento
+  workflow_dispatch:
+
+  # Executa o workflow sempre que houver um push nas branch master ou main
+  push:
+    branches:
+      - master
+      - main
+
+jobs:
+  generate:
+    permissions: 
+      contents: write  # Concede permissão para escrever nos conteúdos do repositório
+    runs-on: ubuntu-latest  # Define o sistema operacional onde o job será executado
+    timeout-minutes: 10  # Define um tempo limite para o job
+    
+    steps:
+      # Passo 1: Fazer checkout (clonar) do repositório para a máquina virtual
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Passo 2: Garantir que o diretório 'dist' exista para armazenar os arquivos gerados
+      - name: Ensure dist directory exists
+        run: mkdir -p dist
+
+      # Passo 3: Gerar a animação da cobra (apenas SVGs)
+      - name: Generate GitHub Contribution Snake
+        uses: Platane/snk/svg-only@v3
+        with:
+          github_user_name: ${{ github.repository_owner }}  # Define o usuário do GitHub para a animação
+          outputs: |
+            # Arquivos padrão da cobra
+            dist/github-snake.svg
+            dist/github-snake-dark.svg?palette=github-dark
+            
+            # Temas personalizados com diferentes cores para a cobra e os pontos
+            dist/ocean.svg?color_snake=orange&color_dots=#bfd6f6,#8dbdff,#64a1f4,#4b91f1,#3c7dd9
+            
+            dist/ocean-dark.svg?palette=github-light&color_snake=purple&color_dots=#8bd6cf,#1da2c2,#146589,#123b55,#12172b
+            dist/burnt-yellow.svg?palette=github-light&color_snake=#3f170b&color_dots=#fff8cd,#d59037,#985a27,#673316,#3f170b
+            dist/dusky-bloom.svg?palette=github-light&color_snake=#323021&color_dots=#fff8cd,#ffb2ed,#bfa0ff,#4b643f,#323021
+            dist/sunset.svg?color_snake=red&color_dots=#ffdab9,#ffb347,#ff8c00,#ff4500,#dc143c
+            dist/forest.svg?color_snake=green&color_dots=#d4edda,#a3d9a5,#76c68f,#45b06f,#2e8b57
+            dist/galaxy.svg?color_snake=purple&color_dots=#e0bbff,#c77dff,#9d4edd,#6a0dad,#4b0082
+            dist/fire.svg?color_snake=#141406&color_dots=#f2ffc4,#ffff7d,#ffc62b,#ff7219,##ff0054
+            dist/neon.svg?color_snake=#412904&color_dots=#e6ffcc,#ccff99,#99ff66,#66ff33,#33cc00
+            dist/candy.svg?color_snake=purple&color_dots=#ffb6c1,#ff85a2,#ff4f79,#ff1a52,#c71585
+            dist/aqua.svg?color_snake=cyan&color_dots=#e0ffff,#b3ffff,#80ffff,#4dffff,#00ced1
+            dist/space.svg?color_snake=red&color_dots=#16213e,#0f3460,#533483,#e94560,#ff6f61
+            dist/cyberpunk.svg?color_snake=#004366&color_dots=#142107,#0f5a45,#ff948d,#ffcb9c,#fffab7
+            dist/rainbow.svg?palette=github-light&color_snake=#1a1a1a&color_dots=#ffb3b3,#ffbb66,#ffec80,#66cc99,#6699ff,#4b1f5c
+            dist/rainbow-dark.svg?palette=github-light&color_snake=#1a1a1a&color_dots=#e68a00,#e0d100,#4d8b66,#3366cc,#3d145e
+            dist/cool.svg?palette=github-light&color_snake=#2b372f&color_dots=#f3eae8,#fffbc0,#ffe262,#ff921f,#327285
+
+      # Passo 4: Debug - Listar arquivos gerados no diretório 'dist' para verificar se tudo foi criado corretamente
+      - name: Debug - List generated files
+        run: ls -R dist || echo "Directory dist does not exist"
+
+      # Passo 5: Fazer push dos arquivos gerados para a branch 'output'
+      - name: Push generated files to output branch
+        uses: crazy-max/ghaction-github-pages@v3.1.0
+        with:
+          target_branch: output  # Define a branch onde os arquivos serão armazenados
+          build_dir: dist  # Define o diretório que contém os arquivos gerados
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Token para autenticar e permitir o push na branch
