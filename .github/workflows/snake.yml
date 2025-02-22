@@ -1,14 +1,14 @@
 name: Generator Snake  # Nome do workflow
 
 on:
-  # Agendamento automático a cada 12 horas
+  # Agendamento automático: Executa a cada 12 horas (meia-noite e meio-dia UTC)
   schedule:
     - cron: "0 */12 * * *" 
 
-  # Permite a execução manual do workflow a qualquer momento
+  # Permite a execução manual do workflow a qualquer momento pelo GitHub Actions
   workflow_dispatch:
 
-  # Executa o workflow sempre que houver um push nas branch master ou main
+  # Executa o workflow sempre que houver um push nas branches 'master' ou 'main'
   push:
     branches:
       - master
@@ -17,20 +17,20 @@ on:
 jobs:
   generate:
     permissions: 
-      contents: write  # Concede permissão para escrever nos conteúdos do repositório
-    runs-on: ubuntu-latest  # Define o sistema operacional onde o job será executado
-    timeout-minutes: 10  # Define um tempo limite para o job
+      contents: write  # Necessário para fazer commit dos arquivos gerados no repositório
+    runs-on: ubuntu-latest  # Define que o job será executado em um ambiente Linux Ubuntu
+    timeout-minutes: 10  # Se demorar mais de 10 minutos, o workflow será interrompido
     
     steps:
-      # Passo 1: Fazer checkout (clonar) do repositório para a máquina virtual
+      # Passo 1: Clonar o repositório para a máquina virtual do GitHub Actions
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Passo 2: Garantir que o diretório 'dist' exista para armazenar os arquivos gerados
+      # Passo 2: Criar o diretório 'dist' caso ele não exista, para armazenar os arquivos gerados
       - name: Ensure dist directory exists
         run: mkdir -p dist
 
-      # Passo 3: Gerar a animação da cobra (apenas SVGs)
+      # Passo 3: Gerar a animação da cobra (arquivos SVG)
       - name: Generate GitHub Contribution Snake
         uses: Platane/snk/svg-only@v3
         with:
@@ -42,7 +42,6 @@ jobs:
             
             # Temas personalizados com diferentes cores para a cobra e os pontos
             dist/ocean.svg?color_snake=orange&color_dots=#bfd6f6,#8dbdff,#64a1f4,#4b91f1,#3c7dd9
-            
             dist/ocean-dark.svg?palette=github-light&color_snake=purple&color_dots=#8bd6cf,#1da2c2,#146589,#123b55,#12172b
             dist/burnt-yellow.svg?palette=github-light&color_snake=#3f170b&color_dots=#fff8cd,#d59037,#985a27,#673316,#3f170b
             dist/dusky-bloom.svg?palette=github-light&color_snake=#323021&color_dots=#fff8cd,#ffb2ed,#bfa0ff,#4b643f,#323021
@@ -59,15 +58,15 @@ jobs:
             dist/rainbow-dark.svg?palette=github-light&color_snake=#1a1a1a&color_dots=#e68a00,#e0d100,#4d8b66,#3366cc,#3d145e
             dist/cool.svg?palette=github-light&color_snake=#2b372f&color_dots=#f3eae8,#fffbc0,#ffe262,#ff921f,#327285
 
-      # Passo 4: Debug - Listar arquivos gerados no diretório 'dist' para verificar se tudo foi criado corretamente
+      # Passo 4: Verificar se os arquivos foram gerados corretamente
       - name: Debug - List generated files
-        run: ls -R dist || echo "Directory dist does not exist"
+        run: ls -R dist || echo "Directory dist does not exist"  # Lista os arquivos ou exibe uma mensagem de erro
 
       # Passo 5: Fazer push dos arquivos gerados para a branch 'output'
       - name: Push generated files to output branch
         uses: crazy-max/ghaction-github-pages@v3.1.0
         with:
-          target_branch: output  # Define a branch onde os arquivos serão armazenados
+          target_branch: output  # Define a branch onde os arquivos gerados serão armazenados
           build_dir: dist  # Define o diretório que contém os arquivos gerados
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Token para autenticar e permitir o push na branch
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Token do GitHub necessário para permitir o push na branch
